@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CropGuard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #56ab2f, #a8e063);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin-top: 80px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #2e7d32;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1b5e20;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        img {
+            margin-top: 15px;
+            max-width: 200px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🌿 CropGuard</h1>
+        <p>Upload a leaf image to detect disease</p>
+
+        <form id="uploadForm">
+            <input type="file" id="imageInput" name="image" required>
+            <br>
+            <button type="submit">Predict</button>
+        </form>
+
+        <img id="preview" src="" alt="" style="display:none;">
+
+        <h2 id="result"></h2>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('preview');
+
+        // Show image preview
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = "block";
+            }
+        });
+
+        // Submit form
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById('result').innerText = data.error;
+            } else {
+                document.getElementById('result').innerText =
+                    "🌱 Disease: " + data.disease +
+                    "\nConfidence: " + data.confidence;
+            }
+        });
+    </script>
+
+</body>
+</html>
